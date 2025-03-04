@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'signup_page_screen.dart';
+import 'learn_track_dash.dart';
 
 class LearnTrackPage extends StatelessWidget {
   const LearnTrackPage({Key? key}) : super(key: key);
@@ -103,8 +104,12 @@ class LearnTrackPage extends StatelessWidget {
                               color: Colors.transparent,
                               child: InkWell(
                                 onTap: () {
-                                  // Handle login
-                                },
+        // Add navigation to SignUpScreen
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const LearnTrackDash()),
+        );
+      },
                                 borderRadius: BorderRadius.circular(12),
                                 child: Center(
                                   child: Text(

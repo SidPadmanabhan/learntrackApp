@@ -1,0 +1,38 @@
+{
+  "flutter": {
+    "platforms": {
+      "ios": {
+        "default": {
+          "projectId": "learntrack-d68e6",
+          "appId": "1:488431640556:ios:9353fbd7be3d2001f96ac9",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "learntrack-d68e6",
+          "configurations": {
+            "ios": "1:488431640556:ios:9353fbd7be3d2001f96ac9"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint"
+      ]
+    }
+  ]
+}
