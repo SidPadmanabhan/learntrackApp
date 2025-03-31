@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../widgets/custom_text_field.dart';
+import '../providers/auth_provider.dart';
+import 'login_page_screen.dart';
+import 'learn_track_dash.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -141,9 +145,38 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 SizedBox(
                                   width: double.infinity,
                                   child: ElevatedButton(
-                                    onPressed: () {
+                                    onPressed: () async {
                                       if (_formKey.currentState!.validate()) {
-                                        // Handle form submission
+                                        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                                        try {
+                                          await authProvider.signUp(
+                                            _emailController.text.trim(),
+                                            _passwordController.text,
+                                          );
+                                          
+                                          if (!mounted) return;
+                                          
+                                          if (authProvider.error == null) {
+                                            Navigator.pushReplacement(
+                                              context,
+                                              MaterialPageRoute(builder: (context) => const LearnTrackDash()),
+                                            );
+                                          } else {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text(authProvider.error!),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                          }
+                                        } catch (e) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text(e.toString()),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                        }
                                       }
                                     },
                                     style: ElevatedButton.styleFrom(
@@ -173,26 +206,34 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         // Sign In Link
                         Padding(
                           padding: const EdgeInsets.fromLTRB(64, 24, 64, 3),
-                          child: RichText(
-                            textAlign: TextAlign.center,
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: 'Already have an account? ',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 14,
-                                    color: const Color(0xFF4B5563),
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (context) => const LoginScreen()),
+                              );
+                            },
+                            child: RichText(
+                              textAlign: TextAlign.center,
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: 'Already have an account? ',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14,
+                                      color: const Color(0xFF4B5563),
+                                    ),
                                   ),
-                                ),
-                                TextSpan(
-                                  text: 'Sign In',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: const Color(0xFF4F46E5),
+                                  TextSpan(
+                                    text: 'Sign In',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      color: const Color(0xFF4F46E5),
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),

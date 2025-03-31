@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
-import 'screens/learn_track_home.dart';  // Add this import
+import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
+import 'firebase_options.dart';
+import 'providers/auth_provider.dart';
+import 'screens/learn_track_home.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -10,13 +18,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+    return ChangeNotifierProvider(
+      create: (_) => AuthProvider(),
+      child: MaterialApp(
+        title: 'LearnTrack',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          useMaterial3: true,
+        ),
+        home: const LearnTrackPage(),
       ),
-      home: const LearnTrackPage(),  // Changed to reference HomePage from screens/home.dart
     );
   }
 }

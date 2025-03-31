@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../widgets/custom_input_field.dart';
 import '../widgets/custom_button.dart';
+import '../providers/auth_provider.dart';
+import 'signup_page_screen.dart';
+import 'learn_track_dash.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -141,8 +145,37 @@ class _LoginScreenState extends State<LoginScreen> {
                         // Sign In Button
                         CustomButton(
                           text: 'Sign in',
-                          onPressed: () {
-                            // Implement sign in logic
+                          onPressed: () async {
+                            final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                            try {
+                              await authProvider.signIn(
+                                _emailController.text.trim(),
+                                _passwordController.text,
+                              );
+                              
+                              if (!mounted) return;
+                              
+                              if (authProvider.error == null) {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const LearnTrackDash()),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(authProvider.error!),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(e.toString()),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
                           },
                         ),
                         const SizedBox(height: 24),
@@ -160,7 +193,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             GestureDetector(
                               onTap: () {
-                                // Implement sign up navigation
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const SignUpScreen()),
+                                );
                               },
                               child: Text(
                                 'Sign up',
