@@ -104,7 +104,7 @@ class LearnTrackPage extends StatelessWidget {
                               color: Colors.transparent,
                               child: InkWell(
                                 onTap: () {
-        // Add navigation to SignUpScreen
+        // Add navigation to DashBoard
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const LearnTrackDash()),
