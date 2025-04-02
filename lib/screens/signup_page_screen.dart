@@ -55,7 +55,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           child: Column(
                             children: [
                               Image.network(
-                                "https://png.pngtree.com/png-vector/20220615/ourmid/pngtree-abstract-human-brain-doodle-hand-drawn-style-png-image_5064371.png",
+                                "https://thumbs.dreamstime.com/b/human-brain-cartoon-vector-illustration-graphic-design-human-brain-cartoon-scribble-123876987.jpg",
                                 width: 68,
                                 height: 56,
                                 fit: BoxFit.contain,
