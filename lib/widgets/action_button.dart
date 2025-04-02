@@ -6,12 +6,14 @@ class ActionButton extends StatelessWidget {
   final String icon;
   final String label;
   final bool isActive;
+  final VoidCallback? onTap;
 
   const ActionButton({
     Key? key,
     required this.icon,
     required this.label,
     required this.isActive,
+    this.onTap,
   }) : super(key: key);
 
   String get _iconSvg {
@@ -28,29 +30,32 @@ class ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isActive ? const Color(0xFF4F46E5) : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SvgPicture.string(
-            _iconSvg,
-            width: 24,
-            height: 24,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: GoogleFonts.poppins(
-              fontSize: 16,
-              color: isActive ? Colors.white : const Color(0xFF1F2937),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isActive ? const Color(0xFF4F46E5) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SvgPicture.string(
+              _iconSvg,
+              width: 24,
+              height: 24,
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                color: isActive ? Colors.white : const Color(0xFF1F2937),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

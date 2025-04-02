@@ -5,6 +5,7 @@ import '../widgets/course_card.dart';
 import '../widgets/action_button.dart';
 import '../widgets/streak_overview.dart';
 import '../widgets/search_bar.dart';
+import './learn_track_pomodoro.dart';
 
 class LearnTrackDash extends StatelessWidget {
   const LearnTrackDash({Key? key}) : super(key: key);
@@ -90,16 +91,24 @@ class LearnTrackDash extends StatelessWidget {
 
                 // Action Buttons
                 Row(
-                  children: const [
+                  children: [
                     Expanded(
                       child: ActionButton(
                         icon: 'timer',
                         label: 'Pomodoro',
                         isActive: true,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LearnTrackPomodoro(),
+                            ),
+                          );
+                        },
                       ),
                     ),
-                    SizedBox(width: 16),
-                    Expanded(
+                    const SizedBox(width: 16),
+                    const Expanded(
                       child: ActionButton(
                         icon: 'paths',
                         label: 'My Paths',
