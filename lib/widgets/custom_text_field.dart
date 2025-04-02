@@ -5,7 +5,6 @@ class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
   final String hintText;
-  final String iconUrl;
   final bool isPassword;
   final TextInputType? keyboardType;
 
@@ -14,7 +13,6 @@ class CustomTextField extends StatelessWidget {
     required this.controller,
     required this.label,
     required this.hintText,
-    required this.iconUrl,
     this.isPassword = false,
     this.keyboardType,
   }) : super(key: key);
@@ -55,15 +53,6 @@ class CustomTextField extends StatelessWidget {
               hintStyle: GoogleFonts.inter(
                 fontSize: 16,
                 color: const Color(0xFFADAEBC),
-              ),
-              prefixIcon: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Image.network(
-                  iconUrl,
-                  width: 14,
-                  height: 16,
-                  fit: BoxFit.contain,
-                ),
               ),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(
