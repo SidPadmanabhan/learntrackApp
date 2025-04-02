@@ -45,6 +45,7 @@ class AuthProvider extends ChangeNotifier {
           'age': age,
           'createdAt': Timestamp.now(),
         });
+        print('User data saved to Firestore');
       }
     } catch (e) {
       _error = e.toString();
