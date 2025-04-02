@@ -12,7 +12,8 @@ class AuthService {
     required String password,
   }) async {
     try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -69,7 +70,8 @@ class AuthService {
     try {
       await _auth.sendPasswordResetEmail(email: email);
     } on FirebaseAuthException catch (e) {
-      throw e.message ?? 'An error occurred while sending password reset email.';
+      throw e.message ??
+          'An error occurred while sending password reset email.';
     }
   }
-} 
+}

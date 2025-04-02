@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Make sure this is at the top
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -20,16 +21,31 @@ class AuthProvider extends ChangeNotifier {
   String? get error => _error;
   bool get isAuthenticated => _user != null;
 
-  Future<void> signUp(String email, String password) async {
+  Future<void> signUp({
+    required String fullName,
+    required String email,
+    required String password,
+    required int age,
+  }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      await _authService.signUpWithEmailAndPassword(
+      final userCredential = await _authService.signUpWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      final uid = userCredential?.user?.uid;
+      if (uid != null) {
+        await FirebaseFirestore.instance.collection('users').doc(uid).set({
+          'fullName': fullName,
+          'email': email,
+          'age': age,
+          'createdAt': Timestamp.now(),
+        });
+      }
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -90,4 +106,4 @@ class AuthProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
   }
-} 
+}

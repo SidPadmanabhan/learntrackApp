@@ -59,7 +59,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 width: 68,
                                 height: 56,
                                 fit: BoxFit.contain,
-                              ),      
+                              ),
                               const SizedBox(height: 9),
                               Text(
                                 'LearnTrack',
@@ -111,7 +111,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   controller: _nameController,
                                   label: 'Full Name',
                                   hintText: 'Enter your name',
-                                  iconUrl: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Bust%20in%20Silhouette.png",
+                                  iconUrl:
+                                      "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Bust%20in%20Silhouette.png",
                                 ),
                                 const SizedBox(height: 16),
 
@@ -119,7 +120,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   controller: _emailController,
                                   label: 'Email',
                                   hintText: 'Enter your email',
-                                  iconUrl: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Envelope.png",
+                                  iconUrl:
+                                      "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Envelope.png",
                                 ),
                                 const SizedBox(height: 16),
 
@@ -127,7 +129,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   controller: _passwordController,
                                   label: 'Password',
                                   hintText: 'Create a password',
-                                  iconUrl: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Key.png",
+                                  iconUrl:
+                                      "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Key.png",
                                   isPassword: true,
                                 ),
                                 const SizedBox(height: 16),
@@ -136,7 +139,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   controller: _ageController,
                                   label: 'Age',
                                   hintText: 'Enter your age',
-                                  iconUrl: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Numbers.png",
+                                  iconUrl:
+                                      "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Numbers.png",
                                   keyboardType: TextInputType.number,
                                 ),
                                 const SizedBox(height: 16),
@@ -147,30 +151,40 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   child: ElevatedButton(
                                     onPressed: () async {
                                       if (_formKey.currentState!.validate()) {
-                                        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                                        final authProvider =
+                                            Provider.of<AuthProvider>(context,
+                                                listen: false);
                                         try {
                                           await authProvider.signUp(
-                                            _emailController.text.trim(),
-                                            _passwordController.text,
+                                            fullName:
+                                                _nameController.text.trim(),
+                                            email: _emailController.text.trim(),
+                                            password: _passwordController.text,
+                                            age: int.parse(
+                                                _ageController.text.trim()),
                                           );
-                                          
                                           if (!mounted) return;
-                                          
+
                                           if (authProvider.error == null) {
                                             Navigator.pushReplacement(
                                               context,
-                                              MaterialPageRoute(builder: (context) => const LearnTrackDash()),
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      const LearnTrackDash()),
                                             );
                                           } else {
-                                            ScaffoldMessenger.of(context).showSnackBar(
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
                                               SnackBar(
-                                                content: Text(authProvider.error!),
+                                                content:
+                                                    Text(authProvider.error!),
                                                 backgroundColor: Colors.red,
                                               ),
                                             );
                                           }
                                         } catch (e) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
                                             SnackBar(
                                               content: Text(e.toString()),
                                               backgroundColor: Colors.red,
@@ -210,7 +224,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             onTap: () {
                               Navigator.pushReplacement(
                                 context,
-                                MaterialPageRoute(builder: (context) => const LoginScreen()),
+                                MaterialPageRoute(
+                                    builder: (context) => const LoginScreen()),
                               );
                             },
                             child: RichText(
