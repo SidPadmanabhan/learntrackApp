@@ -140,7 +140,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   label: 'Age',
                                   hintText: 'Enter your age',
                                   iconUrl:
-                                      "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Numbers.png",
+                                      "iconUrl:https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Black_Up-Pointing_Triangle.svg/1024px-Black_Up-Pointing_Triangle.svg.png",
                                   keyboardType: TextInputType.number,
                                 ),
                                 const SizedBox(height: 16),
