@@ -111,8 +111,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   controller: _nameController,
                                   label: 'Full Name',
                                   hintText: 'Enter your name',
-                                  iconUrl:
-                                      "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Bust%20in%20Silhouette.png",
                                 ),
                                 const SizedBox(height: 16),
 
@@ -120,8 +118,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   controller: _emailController,
                                   label: 'Email',
                                   hintText: 'Enter your email',
-                                  iconUrl:
-                                      "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Envelope.png",
                                 ),
                                 const SizedBox(height: 16),
 
@@ -129,8 +125,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   controller: _passwordController,
                                   label: 'Password',
                                   hintText: 'Create a password',
-                                  iconUrl:
-                                      "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Key.png",
                                   isPassword: true,
                                 ),
                                 const SizedBox(height: 16),
@@ -139,8 +133,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   controller: _ageController,
                                   label: 'Age',
                                   hintText: 'Enter your age',
-                                  iconUrl:
-                                      "iconUrl:https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Black_Up-Pointing_Triangle.svg/1024px-Black_Up-Pointing_Triangle.svg.png",
                                   keyboardType: TextInputType.number,
                                 ),
                                 const SizedBox(height: 16),
@@ -169,8 +161,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                             Navigator.pushReplacement(
                                               context,
                                               MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      const LearnTrackDash()),
+                                                builder: (context) =>
+                                                    const LearnTrackDash(),
+                                              ),
                                             );
                                           } else {
                                             ScaffoldMessenger.of(context)
@@ -225,7 +218,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => const LoginScreen()),
+                                  builder: (context) => const LoginScreen(),
+                                ),
                               );
                             },
                             child: RichText(
