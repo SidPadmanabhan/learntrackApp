@@ -47,7 +47,9 @@ class AuthProvider extends ChangeNotifier {
         });
         print('User data saved to Firestore');
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Error saving user to Firestore: $e');
+      print('StackTrace: $stackTrace');
       _error = e.toString();
     } finally {
       _isLoading = false;

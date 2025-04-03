@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 class LearnTrackPomodoro extends StatefulWidget {
+  const LearnTrackPomodoro({super.key});
+
   @override
   _LearnTrackPomodoroState createState() => _LearnTrackPomodoroState();
 }
@@ -14,7 +16,7 @@ class _LearnTrackPomodoroState extends State<LearnTrackPomodoro> {
 
   void startTimer() {
     if (timer == null || !timer!.isActive) {
-      timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      timer = Timer.periodic(const Duration(seconds: 1), (timer) {
         if (currentSeconds > 0) {
           setState(() {
             currentSeconds--;
@@ -66,7 +68,7 @@ class _LearnTrackPomodoroState extends State<LearnTrackPomodoro> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Focus Timer")),
+      appBar: AppBar(title: const Text("Focus Timer")),
       body: Column(
         children: [
           Row(
@@ -77,7 +79,7 @@ class _LearnTrackPomodoroState extends State<LearnTrackPomodoro> {
               _buildTimeButton("Long Break", 600),
             ],
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Stack(
             alignment: Alignment.center,
             children: [
@@ -89,25 +91,27 @@ class _LearnTrackPomodoroState extends State<LearnTrackPomodoro> {
               ),
               Text(
                 formatTime(currentSeconds),
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
               ),
             ],
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton(
-                icon: Icon(Icons.play_arrow, size: 40, color: Colors.blue),
+                icon:
+                    const Icon(Icons.play_arrow, size: 40, color: Colors.blue),
                 onPressed: startTimer,
               ),
               IconButton(
-                icon: Icon(Icons.refresh, size: 40, color: Colors.grey),
+                icon: const Icon(Icons.refresh, size: 40, color: Colors.grey),
                 onPressed: resetTimer,
               ),
             ],
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           _buildLearningTimeline(),
         ],
       ),
@@ -116,13 +120,14 @@ class _LearnTrackPomodoroState extends State<LearnTrackPomodoro> {
 
   Widget _buildTimeButton(String label, int seconds) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 5),
       child: ElevatedButton(
         onPressed: () => setTimer(seconds),
         style: ElevatedButton.styleFrom(
-          backgroundColor: totalSeconds == seconds ? Colors.blue : Colors.grey[300],
+          backgroundColor:
+              totalSeconds == seconds ? Colors.blue : Colors.grey[300],
         ),
-        child: Text(label, style: TextStyle(color: Colors.black)),
+        child: Text(label, style: const TextStyle(color: Colors.black)),
       ),
     );
   }
@@ -131,19 +136,25 @@ class _LearnTrackPomodoroState extends State<LearnTrackPomodoro> {
     return Expanded(
       child: ListView(
         children: [
-          _buildMilestone("Milestone 1", "Productivity Basics", "Complete introduction to time management", true),
-          _buildMilestone("Milestone 2", "Advanced Techniques", "Master advanced productivity methods", false),
+          _buildMilestone("Milestone 1", "Productivity Basics",
+              "Complete introduction to time management", true),
+          _buildMilestone("Milestone 2", "Advanced Techniques",
+              "Master advanced productivity methods", false),
         ],
       ),
     );
   }
 
-  Widget _buildMilestone(String title, String subtitle, String description, bool completed) {
+  Widget _buildMilestone(
+      String title, String subtitle, String description, bool completed) {
     return Card(
       child: ListTile(
-        title: Text(subtitle, style: TextStyle(fontWeight: FontWeight.bold)),
+        title:
+            Text(subtitle, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(description),
-        trailing: completed ? Icon(Icons.check_circle, color: Colors.green) : Icon(Icons.radio_button_unchecked, color: Colors.grey),
+        trailing: completed
+            ? const Icon(Icons.check_circle, color: Colors.green)
+            : const Icon(Icons.radio_button_unchecked, color: Colors.grey),
       ),
     );
   }

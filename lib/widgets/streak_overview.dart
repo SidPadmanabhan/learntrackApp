@@ -42,9 +42,9 @@ class StreakOverview extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
+            children: [
               StreakDay(day: 'Mon', isCompleted: true),
               StreakDay(day: 'Tue', isCompleted: true),
               StreakDay(day: 'Wed', isCompleted: true),
