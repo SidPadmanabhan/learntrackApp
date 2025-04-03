@@ -6,6 +6,9 @@ import '../widgets/action_button.dart';
 import '../widgets/streak_overview.dart';
 import '../widgets/search_bar.dart';
 import './learn_track_pomodoro.dart';
+import './learn_track_home.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 
 class LearnTrackDash extends StatelessWidget {
   const LearnTrackDash({Key? key}) : super(key: key);
@@ -121,6 +124,59 @@ class LearnTrackDash extends StatelessWidget {
 
                 // Streak Section
                 const StreakOverview(),
+
+                // Logout Button
+                const SizedBox(height: 32),
+                Container(
+                  width: double.infinity,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(
+                      color: const Color(0xFFD1D5DB),
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () async {
+                        await Provider.of<AuthProvider>(context, listen: false)
+                            .signOut();
+                        if (context.mounted) {
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                                builder: (context) => const LearnTrackPage()),
+                            (Route<dynamic> route) => false,
+                          );
+                        }
+                      },
+                      borderRadius: BorderRadius.circular(8),
+                      child: Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.logout_rounded,
+                              size: 20,
+                              color: const Color(0xFF6B7280),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Log Out',
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF6B7280),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
