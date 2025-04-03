@@ -7,6 +7,7 @@ class AuthProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
   Map<String, dynamic>? _userData;
+  bool _serverConnected = false;
 
   AuthProvider() {
     _initialize();
@@ -14,6 +15,9 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> _initialize() async {
     try {
+      _serverConnected = await _authService.checkServerConnectivity();
+      print('Server connected: $_serverConnected');
+
       await _authService.initialize();
       _user = _authService.currentUser;
       if (_user != null) {
@@ -22,6 +26,7 @@ class AuthProvider extends ChangeNotifier {
       _authService.authStateChanges.addListener(_onAuthStateChanged);
     } catch (e) {
       _error = e.toString();
+      print('Initialization error: $e');
     }
     notifyListeners();
   }
@@ -53,12 +58,34 @@ class AuthProvider extends ChangeNotifier {
   int? get age => _userData?['age'] as int?;
   String? get email => _user?.email;
 
-  Future<void> signUp(String email, String password, String name, int age) async {
+  bool get serverConnected => _serverConnected;
+
+  Future<bool> checkServerConnection() async {
+    try {
+      _serverConnected = await _authService.checkServerConnectivity();
+      print('Server connection check: $_serverConnected');
+      notifyListeners();
+      return _serverConnected;
+    } catch (e) {
+      print('Server connection check error: $e');
+      _serverConnected = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<void> signUp(
+      String email, String password, String name, int age) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
+      // Check server connectivity first
+      if (!await checkServerConnection()) {
+        throw "Server is not reachable. Please check your connection.";
+      }
+
       await _authService.signUpWithEmailAndPassword(
         email: email,
         password: password,
@@ -68,6 +95,7 @@ class AuthProvider extends ChangeNotifier {
       await _fetchUserData();
     } catch (e) {
       _error = e.toString();
+      print('Signup error: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -80,6 +108,11 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      // Check server connectivity first
+      if (!await checkServerConnection()) {
+        throw "Server is not reachable. Please check your connection.";
+      }
+
       await _authService.signInWithEmailAndPassword(
         email: email,
         password: password,
@@ -87,6 +120,7 @@ class AuthProvider extends ChangeNotifier {
       await _fetchUserData();
     } catch (e) {
       _error = e.toString();
+      print('Login error: $e');
     } finally {
       _isLoading = false;
       notifyListeners();

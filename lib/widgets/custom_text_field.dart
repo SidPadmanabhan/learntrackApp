@@ -8,6 +8,7 @@ class CustomTextField extends StatefulWidget {
   final bool isPassword;
   final TextInputType? keyboardType;
   final String? iconUrl;
+  final IconData? icon;
   final String? Function(String?)? validator;
 
   const CustomTextField({
@@ -18,6 +19,7 @@ class CustomTextField extends StatefulWidget {
     this.isPassword = false,
     this.keyboardType,
     this.iconUrl,
+    this.icon,
     this.validator,
   }) : super(key: key);
 
@@ -57,16 +59,22 @@ class _CustomTextFieldState extends State<CustomTextField> {
               fontSize: 14,
               color: const Color(0xFF9CA3AF),
             ),
-            prefixIcon: widget.iconUrl != null
-                ? Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Image.network(
-                      widget.iconUrl!,
-                      width: 24,
-                      height: 24,
-                    ),
+            prefixIcon: widget.icon != null
+                ? Icon(
+                    widget.icon,
+                    color: const Color(0xFF9CA3AF),
+                    size: 24,
                   )
-                : null,
+                : (widget.iconUrl != null
+                    ? Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Image.network(
+                          widget.iconUrl!,
+                          width: 24,
+                          height: 24,
+                        ),
+                      )
+                    : null),
             suffixIcon: widget.isPassword
                 ? IconButton(
                     icon: Icon(

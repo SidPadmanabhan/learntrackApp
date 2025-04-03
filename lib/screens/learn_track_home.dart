@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'signup_page_screen.dart';
-import 'learn_track_dash.dart';
+import 'login_page_screen.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class LearnTrackPage extends StatelessWidget {
   const LearnTrackPage({Key? key}) : super(key: key);
@@ -33,7 +33,7 @@ class LearnTrackPage extends StatelessWidget {
                         ),
                         child: Column(
                           children: [
-                            // Brain Logo SVG
+                            // Brain Logo Image
                             Padding(
                               padding: const EdgeInsets.only(bottom: 20.0),
                               child: SvgPicture.string(
@@ -104,12 +104,14 @@ class LearnTrackPage extends StatelessWidget {
                               color: Colors.transparent,
                               child: InkWell(
                                 onTap: () {
-        // Add navigation to DashBoard
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const LearnTrackDash()),
-        );
-      },
+                                  // Navigate to login screen instead of dashboard
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const LoginScreen()),
+                                  );
+                                },
                                 borderRadius: BorderRadius.circular(12),
                                 child: Center(
                                   child: Text(
@@ -128,42 +130,43 @@ class LearnTrackPage extends StatelessWidget {
                           SizedBox(height: isSmallScreen ? 12 : 16),
 
                           // Sign Up Button
-                         Container(
-  width: double.infinity,
-  height: 60,
-  decoration: BoxDecoration(
-    color: Colors.white,
-    border: Border.all(
-      color: const Color(0xFF2563EB),
-      width: 2,
-    ),
-    borderRadius: BorderRadius.circular(12),
-  ),
-  child: Material(
-    color: Colors.transparent,
-    child: InkWell(
-      onTap: () {
-        // Add navigation to SignUpScreen
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const SignUpScreen()),
-        );
-      },
-      borderRadius: BorderRadius.circular(12),
-      child: Center(
-        child: Text(
-          'Sign Up',
-          style: GoogleFonts.inter(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF2563EB),
-          ),
-        ),
-      ),
-    ),
-  ),
-),
-
+                          Container(
+                            width: double.infinity,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              border: Border.all(
+                                color: const Color(0xFF2563EB),
+                                width: 2,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () {
+                                  // Add navigation to SignUpScreen
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const SignUpScreen()),
+                                  );
+                                },
+                                borderRadius: BorderRadius.circular(12),
+                                child: Center(
+                                  child: Text(
+                                    'Sign Up',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF2563EB),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ],

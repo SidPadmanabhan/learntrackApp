@@ -91,7 +91,8 @@ class _LearnTrackPomodoroState extends State<LearnTrackPomodoro> {
               ),
               Text(
                 formatTime(currentSeconds),
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -100,7 +101,8 @@ class _LearnTrackPomodoroState extends State<LearnTrackPomodoro> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton(
-                icon: Icon(Icons.play_arrow, size: 40, color: Colors.blue),
+                icon:
+                    const Icon(Icons.play_arrow, size: 40, color: Colors.blue),
                 onPressed: startTimer,
               ),
               IconButton(
@@ -147,9 +149,12 @@ class _LearnTrackPomodoroState extends State<LearnTrackPomodoro> {
       String title, String subtitle, String description, bool completed) {
     return Card(
       child: ListTile(
-        title: Text(subtitle, style: TextStyle(fontWeight: FontWeight.bold)),
+        title:
+            Text(subtitle, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(description),
-        trailing: completed ? Icon(Icons.check_circle, color: Colors.green) : Icon(Icons.radio_button_unchecked, color: Colors.grey),
+        trailing: completed
+            ? const Icon(Icons.check_circle, color: Colors.green)
+            : const Icon(Icons.radio_button_unchecked, color: Colors.grey),
       ),
     );
   }
