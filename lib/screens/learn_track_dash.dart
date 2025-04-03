@@ -49,7 +49,7 @@ class LearnTrackDash extends StatelessWidget {
 
                 // Welcome Section
                 Text(
-                  'Hello, Sarah',
+                  'Welcome!',
                   style: GoogleFonts.poppins(
                     fontSize: 30,
                     color: const Color(0xFF1F2937),
