@@ -1,107 +1,196 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'user_service.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class User {
+  final String uid;
+  final String email;
+  final String? name;
+
+  User({required this.uid, required this.email, this.name});
+}
 
 class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final UserService _userService = UserService();
-
+  final String baseUrl = 'http://localhost:5000/api'; // Change to your Flask API URL
+  User? _currentUser;
+  
+  // Get the current authenticated user
+  User? get currentUser => _currentUser;
+  
   // Stream to listen to auth state changes
-  Stream<User?> get authStateChanges => _auth.authStateChanges();
+  final ValueNotifier<User?> _authStateChanges = ValueNotifier<User?>(null);
+  ValueNotifier<User?> get authStateChanges => _authStateChanges;
+
+  // Initialize and check for stored token
+  Future<void> initialize() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    
+    if (token != null) {
+      try {
+        // Validate token with backend
+        final response = await http.get(
+          Uri.parse('$baseUrl/auth/validate'),
+          headers: {'Authorization': 'Bearer $token'},
+        );
+        
+        if (response.statusCode == 200) {
+          final userData = jsonDecode(response.body);
+          _currentUser = User(
+            uid: userData['uid'],
+            email: userData['email'],
+            name: userData['name'],
+          );
+          _authStateChanges.value = _currentUser;
+        } else {
+          // Token invalid, clear it
+          await prefs.remove('auth_token');
+        }
+      } catch (e) {
+        // Error occurred, clear token
+        await prefs.remove('auth_token');
+      }
+    }
+  }
 
   // Sign up with email and password
-  Future<UserCredential?> signUpWithEmailAndPassword({
+  Future<User?> signUpWithEmailAndPassword({
     required String email,
     required String password,
     required String name,
     required int age,
   }) async {
     try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/signup'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+          'name': name,
+          'age': age,
+        }),
       );
 
-      // Create the user document in Firestore
-      if (userCredential.user != null) {
-        await _userService.createUserDocument(
-          uid: userCredential.user!.uid,
+      if (response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        final token = data['token'];
+        
+        // Store token
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', token);
+        
+        // Set current user
+        _currentUser = User(
+          uid: data['uid'],
           email: email,
           name: name,
-          age: age,
         );
+        _authStateChanges.value = _currentUser;
+        
+        return _currentUser;
+      } else {
+        final error = jsonDecode(response.body);
+        throw error['message'] ?? 'An error occurred during sign up.';
       }
-
-      return userCredential;
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        throw 'The password provided is too weak.';
-      } else if (e.code == 'email-already-in-use') {
-        throw 'An account already exists for that email.';
-      }
-      throw e.message ?? 'An error occurred during sign up.';
     } catch (e) {
-      throw 'An error occurred during sign up.';
+      throw e.toString();
     }
   }
 
   // Sign in with email and password
-  Future<UserCredential?> signInWithEmailAndPassword({
+  Future<User?> signInWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+        }),
       );
 
-      // Update last login time
-      if (userCredential.user != null) {
-        await _userService.updateLastLogin(userCredential.user!.uid);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final token = data['token'];
+        
+        // Store token
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', token);
+        
+        // Set current user
+        _currentUser = User(
+          uid: data['uid'],
+          email: email,
+          name: data['name'],
+        );
+        _authStateChanges.value = _currentUser;
+        
+        return _currentUser;
+      } else {
+        final error = jsonDecode(response.body);
+        throw error['message'] ?? 'An error occurred during sign in.';
       }
-
-      return userCredential;
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        throw 'No user found for that email.';
-      } else if (e.code == 'wrong-password') {
-        throw 'Wrong password provided.';
-      }
-      throw e.message ?? 'An error occurred during sign in.';
     } catch (e) {
-      throw 'An error occurred during sign in.';
+      throw e.toString();
     }
   }
 
   // Sign out
   Future<void> signOut() async {
     try {
-      await _auth.signOut();
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('auth_token');
+      _currentUser = null;
+      _authStateChanges.value = null;
     } catch (e) {
       throw 'An error occurred while signing out.';
     }
   }
 
-  // Get current user
-  User? get currentUser => _auth.currentUser;
-
   // Password reset
   Future<void> sendPasswordResetEmail(String email) async {
     try {
-      await _auth.sendPasswordResetEmail(email: email);
-    } on FirebaseAuthException catch (e) {
-      throw e.message ?? 'An error occurred while sending password reset email.';
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/reset-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+      
+      if (response.statusCode != 200) {
+        final error = jsonDecode(response.body);
+        throw error['message'] ?? 'An error occurred while sending password reset email.';
+      }
+    } catch (e) {
+      throw e.toString();
     }
   }
 
   // Get user data
   Future<Map<String, dynamic>?> getCurrentUserData() async {
     try {
-      final user = currentUser;
-      if (user != null) {
-        return await _userService.getUserData(user.uid);
+      if (_currentUser == null) return null;
+      
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      
+      if (token == null) return null;
+      
+      final response = await http.get(
+        Uri.parse('$baseUrl/users/${_currentUser!.uid}'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        final error = jsonDecode(response.body);
+        throw error['message'] ?? 'An error occurred while getting user data.';
       }
-      return null;
     } catch (e) {
       throw 'Error getting user data: $e';
     }

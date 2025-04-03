@@ -1,14 +1,17 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final String baseUrl = 'http://localhost:5000/api'; // Change to your Flask API URL
 
-  // Collection reference
-  CollectionReference get _users => _firestore.collection('users');
+  // Get auth token from shared preferences
+  Future<String?> _getAuthToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('auth_token');
+  }
 
-  // Create new user document in Firestore
+  // Create new user document
   Future<void> createUserDocument({
     required String uid,
     required String email,
@@ -17,20 +20,27 @@ class UserService {
     DateTime? createdAt,
   }) async {
     try {
-      await _users.doc(uid).set({
-        'uid': uid,
-        'email': email,
-        'name': name,
-        'age': age,
-        'createdAt': createdAt ?? DateTime.now(),
-        'lastLogin': DateTime.now(),
-        'courses': [],
-        'progress': {},
-        'settings': {
-          'notifications': true,
-          'emailUpdates': true,
-        }
-      });
+      final token = await _getAuthToken();
+      
+      final response = await http.post(
+        Uri.parse('$baseUrl/users'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'uid': uid,
+          'email': email,
+          'name': name,
+          'age': age,
+          'createdAt': createdAt?.toIso8601String() ?? DateTime.now().toIso8601String(),
+        }),
+      );
+      
+      if (response.statusCode != 201) {
+        final error = jsonDecode(response.body);
+        throw error['message'] ?? 'Error creating user document';
+      }
     } catch (e) {
       throw 'Error creating user document: $e';
     }
@@ -39,9 +49,20 @@ class UserService {
   // Update user's last login
   Future<void> updateLastLogin(String uid) async {
     try {
-      await _users.doc(uid).update({
-        'lastLogin': DateTime.now(),
-      });
+      final token = await _getAuthToken();
+      
+      final response = await http.patch(
+        Uri.parse('$baseUrl/users/$uid/login'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      
+      if (response.statusCode != 200) {
+        final error = jsonDecode(response.body);
+        throw error['message'] ?? 'Error updating last login';
+      }
     } catch (e) {
       throw 'Error updating last login: $e';
     }
@@ -50,20 +71,25 @@ class UserService {
   // Get user data
   Future<Map<String, dynamic>?> getUserData(String uid) async {
     try {
-      DocumentSnapshot doc = await _users.doc(uid).get();
-      return doc.exists ? doc.data() as Map<String, dynamic> : null;
+      final token = await _getAuthToken();
+      
+      final response = await http.get(
+        Uri.parse('$baseUrl/users/$uid'),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+      
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else if (response.statusCode == 404) {
+        return null;
+      } else {
+        final error = jsonDecode(response.body);
+        throw error['message'] ?? 'Error getting user data';
+      }
     } catch (e) {
       throw 'Error getting user data: $e';
-    }
-  }
-
-  // Check if user exists
-  Future<bool> checkUserExists(String uid) async {
-    try {
-      DocumentSnapshot doc = await _users.doc(uid).get();
-      return doc.exists;
-    } catch (e) {
-      throw 'Error checking user existence: $e';
     }
   }
 
@@ -75,13 +101,26 @@ class UserService {
     Map<String, dynamic>? settings,
   }) async {
     try {
+      final token = await _getAuthToken();
       final Map<String, dynamic> updateData = {};
       
       if (name != null) updateData['name'] = name;
       if (age != null) updateData['age'] = age;
       if (settings != null) updateData['settings'] = settings;
 
-      await _users.doc(uid).update(updateData);
+      final response = await http.patch(
+        Uri.parse('$baseUrl/users/$uid'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(updateData),
+      );
+      
+      if (response.statusCode != 200) {
+        final error = jsonDecode(response.body);
+        throw error['message'] ?? 'Error updating user profile';
+      }
     } catch (e) {
       throw 'Error updating user profile: $e';
     }

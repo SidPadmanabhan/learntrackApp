@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Make sure this is at the top
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -11,16 +9,37 @@ class AuthProvider extends ChangeNotifier {
   Map<String, dynamic>? _userData;
 
   AuthProvider() {
-    _authService.authStateChanges.listen((User? user) {
-      _user = user;
-      if (user != null) {
-        // Fetch user data from Firestore when auth state changes
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    try {
+      await _authService.initialize();
+      _user = _authService.currentUser;
+      if (_user != null) {
         _fetchUserData();
-      } else {
-        _userData = null;
       }
-      notifyListeners();
-    });
+      _authService.authStateChanges.addListener(_onAuthStateChanged);
+    } catch (e) {
+      _error = e.toString();
+    }
+    notifyListeners();
+  }
+
+  void _onAuthStateChanged() {
+    _user = _authService.authStateChanges.value;
+    if (_user == null) {
+      _userData = null;
+    } else {
+      _fetchUserData();
+    }
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _authService.authStateChanges.removeListener(_onAuthStateChanged);
+    super.dispose();
   }
 
   User? get user => _user;
@@ -30,7 +49,7 @@ class AuthProvider extends ChangeNotifier {
   Map<String, dynamic>? get userData => _userData;
 
   // Helper methods to access common user data
-  String? get fullName => _userData?['fullName'] as String?;
+  String? get fullName => _userData?['name'] as String?;
   int? get age => _userData?['age'] as int?;
   String? get email => _user?.email;
 
