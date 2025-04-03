@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'user_service.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final UserService _userService = UserService();
 
   // Stream to listen to auth state changes
   Stream<User?> get authStateChanges => _auth.authStateChanges();
@@ -10,13 +12,25 @@ class AuthService {
   Future<UserCredential?> signUpWithEmailAndPassword({
     required String email,
     required String password,
+    required String name,
+    required int age,
   }) async {
     try {
-      UserCredential userCredential =
-          await _auth.createUserWithEmailAndPassword(
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      // Create the user document in Firestore
+      if (userCredential.user != null) {
+        await _userService.createUserDocument(
+          uid: userCredential.user!.uid,
+          email: email,
+          name: name,
+          age: age,
+        );
+      }
+
       return userCredential;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
@@ -40,6 +54,12 @@ class AuthService {
         email: email,
         password: password,
       );
+
+      // Update last login time
+      if (userCredential.user != null) {
+        await _userService.updateLastLogin(userCredential.user!.uid);
+      }
+
       return userCredential;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
@@ -70,8 +90,20 @@ class AuthService {
     try {
       await _auth.sendPasswordResetEmail(email: email);
     } on FirebaseAuthException catch (e) {
-      throw e.message ??
-          'An error occurred while sending password reset email.';
+      throw e.message ?? 'An error occurred while sending password reset email.';
+    }
+  }
+
+  // Get user data
+  Future<Map<String, dynamic>?> getCurrentUserData() async {
+    try {
+      final user = currentUser;
+      if (user != null) {
+        return await _userService.getUserData(user.uid);
+      }
+      return null;
+    } catch (e) {
+      throw 'Error getting user data: $e';
     }
   }
 }

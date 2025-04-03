@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class CustomTextField extends StatelessWidget {
+class CustomTextField extends StatefulWidget {
   final TextEditingController controller;
   final String label;
   final String hintText;
   final bool isPassword;
   final TextInputType? keyboardType;
+  final String? iconUrl;
+  final String? Function(String?)? validator;
 
   const CustomTextField({
     Key? key,
@@ -15,7 +17,16 @@ class CustomTextField extends StatelessWidget {
     required this.hintText,
     this.isPassword = false,
     this.keyboardType,
+    this.iconUrl,
+    this.validator,
   }) : super(key: key);
+
+  @override
+  State<CustomTextField> createState() => _CustomTextFieldState();
+}
+
+class _CustomTextFieldState extends State<CustomTextField> {
+  bool _obscureText = true;
 
   @override
   Widget build(BuildContext context) {
@@ -23,49 +34,91 @@ class CustomTextField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label,
+          widget.label,
           style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w500,
             color: const Color(0xFF374151),
           ),
         ),
-        const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: Colors.white.withOpacity(0.5),
-            border: Border.all(
-              color: const Color(0xFFE5E7EB),
-              width: 1,
-            ),
+        const SizedBox(height: 6),
+        TextFormField(
+          controller: widget.controller,
+          obscureText: widget.isPassword && _obscureText,
+          keyboardType: widget.keyboardType,
+          validator: widget.validator,
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            color: const Color(0xFF1F2937),
           ),
-          child: TextFormField(
-            controller: controller,
-            obscureText: isPassword,
-            keyboardType: keyboardType,
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              color: Colors.black,
+          decoration: InputDecoration(
+            hintText: widget.hintText,
+            hintStyle: GoogleFonts.inter(
+              fontSize: 14,
+              color: const Color(0xFF9CA3AF),
             ),
-            decoration: InputDecoration(
-              hintText: hintText,
-              hintStyle: GoogleFonts.inter(
-                fontSize: 16,
-                color: const Color(0xFFADAEBC),
-              ),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                vertical: 15,
-                horizontal: 12,
+            prefixIcon: widget.iconUrl != null
+                ? Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Image.network(
+                      widget.iconUrl!,
+                      width: 24,
+                      height: 24,
+                    ),
+                  )
+                : null,
+            suffixIcon: widget.isPassword
+                ? IconButton(
+                    icon: Icon(
+                      _obscureText ? Icons.visibility_off : Icons.visibility,
+                      color: const Color(0xFF9CA3AF),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureText = !_obscureText;
+                      });
+                    },
+                  )
+                : null,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Color(0xFFE5E7EB),
+                width: 1,
               ),
             ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'This field is required';
-              }
-              return null;
-            },
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Color(0xFFE5E7EB),
+                width: 1,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Color(0xFF4F46E5),
+                width: 1,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Colors.red,
+                width: 1,
+              ),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Colors.red,
+                width: 1,
+              ),
+            ),
           ),
         ),
       ],

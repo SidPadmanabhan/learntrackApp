@@ -6,101 +6,52 @@ import 'package:cloud_firestore/cloud_firestore.dart'; // Make sure this is at t
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
   User? _user;
-  Map<String, dynamic>? _userData;
   bool _isLoading = false;
   String? _error;
+  Map<String, dynamic>? _userData;
 
   AuthProvider() {
     _authService.authStateChanges.listen((User? user) {
       _user = user;
-      if (user == null) {
-        _userData = null;
+      if (user != null) {
+        // Fetch user data from Firestore when auth state changes
+        _fetchUserData();
       } else {
-        // When auth state changes to logged in, fetch user data
-        fetchUserData(user.uid).then((data) {
-          _userData = data;
-          notifyListeners();
-        }).catchError((e) {
-          print('Error fetching user data on auth state change: $e');
-        });
+        _userData = null;
       }
       notifyListeners();
     });
   }
 
   User? get user => _user;
-  Map<String, dynamic>? get userData => _userData;
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get isAuthenticated => _user != null;
+  Map<String, dynamic>? get userData => _userData;
 
   // Helper methods to access common user data
   String? get fullName => _userData?['fullName'] as String?;
   int? get age => _userData?['age'] as int?;
   String? get email => _user?.email;
 
-  Future<void> signUp({
-    required String fullName,
-    required String email,
-    required String password,
-    required int age,
-  }) async {
+  Future<void> signUp(String email, String password, String name, int age) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      print('SIGNUP: Starting signup process');
-
-      final userCredential = await _authService.signUpWithEmailAndPassword(
+      await _authService.signUpWithEmailAndPassword(
         email: email,
         password: password,
+        name: name,
+        age: age,
       );
-
-      print('SIGNUP: Authentication successful, user created in Firebase Auth');
-
-      final uid = userCredential?.user?.uid;
-      print('SIGNUP: User UID: $uid');
-
-      if (uid != null) {
-        print('SIGNUP: Attempting to save user data to Firestore');
-        try {
-          // Create user data map
-          final userDataMap = {
-            'fullName': fullName,
-            'email': email,
-            'age': age,
-            'createdAt': Timestamp.now(),
-          };
-
-          // Save to Firestore
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(uid)
-              .set(userDataMap);
-
-          // Store locally in provider
-          _userData = userDataMap;
-
-          print('SIGNUP: User data successfully saved to Firestore');
-        } catch (firestoreError, firestoreStack) {
-          print('SIGNUP: Firestore specific error: $firestoreError');
-          print('SIGNUP: Firestore error stack: $firestoreStack');
-          _error = 'Error saving profile data: $firestoreError';
-          throw 'Failed to save user data to Firestore: $firestoreError';
-        }
-      } else {
-        print('SIGNUP: User UID is null after authentication');
-        _error = 'Authentication successful but user ID is missing';
-      }
-    } catch (e, stackTrace) {
-      print('SIGNUP ERROR: $e');
-      print('SIGNUP STACK: $stackTrace');
+      await _fetchUserData();
+    } catch (e) {
       _error = e.toString();
     } finally {
       _isLoading = false;
       notifyListeners();
-      print('SIGNUP: Process complete, isLoading set to false');
     }
   }
 
@@ -110,35 +61,16 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      print('SIGNIN: Attempting to sign in with email');
-      final userCredential = await _authService.signInWithEmailAndPassword(
+      await _authService.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-
-      print('SIGNIN: Authentication successful');
-
-      // Fetch user data from Firestore if authentication is successful
-      final uid = userCredential?.user?.uid;
-      if (uid != null) {
-        try {
-          final userData = await fetchUserData(uid);
-          if (userData != null) {
-            _userData = userData; // Store the user data
-            print('SIGNIN: User profile loaded: ${userData['fullName']}');
-          }
-        } catch (profileError) {
-          // Just log profile errors but don't prevent sign-in
-          print('SIGNIN: Error loading user profile: $profileError');
-        }
-      }
+      await _fetchUserData();
     } catch (e) {
-      print('SIGNIN ERROR: $e');
       _error = e.toString();
     } finally {
       _isLoading = false;
       notifyListeners();
-      print('SIGNIN: Process complete');
     }
   }
 
@@ -149,6 +81,7 @@ class AuthProvider extends ChangeNotifier {
 
     try {
       await _authService.signOut();
+      _userData = null;
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -172,28 +105,18 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> _fetchUserData() async {
+    try {
+      _userData = await _authService.getCurrentUserData();
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
   void clearError() {
     _error = null;
     notifyListeners();
-  }
-
-  // Add a method to fetch user data from Firestore
-  Future<Map<String, dynamic>?> fetchUserData(String uid) async {
-    try {
-      print('SIGNIN: Fetching user data from Firestore for user $uid');
-      final docSnapshot =
-          await FirebaseFirestore.instance.collection('users').doc(uid).get();
-
-      if (docSnapshot.exists) {
-        print('SIGNIN: User data found in Firestore');
-        return docSnapshot.data();
-      } else {
-        print('SIGNIN: No user data found in Firestore');
-        return null;
-      }
-    } catch (e) {
-      print('SIGNIN: Error fetching user data: $e');
-      throw 'Failed to fetch user data: $e';
-    }
   }
 }

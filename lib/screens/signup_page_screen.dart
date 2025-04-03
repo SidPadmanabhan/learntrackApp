@@ -29,8 +29,54 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
+  String? _validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Email is required';
+    }
+    if (!value.contains('@') || !value.contains('.')) {
+      return 'Please enter a valid email';
+    }
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Password is required';
+    }
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+    return null;
+  }
+
+  String? _validateName(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Name is required';
+    }
+    return null;
+  }
+
+  String? _validateAge(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Age is required';
+    }
+    final age = int.tryParse(value);
+    if (age == null) {
+      return 'Please enter a valid age';
+    }
+    if (age < 13) {
+      return 'You must be at least 13 years old';
+    }
+    if (age > 120) {
+      return 'Please enter a valid age';
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -55,11 +101,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           child: Column(
                             children: [
                               Image.network(
-                                "https://thumbs.dreamstime.com/b/human-brain-cartoon-vector-illustration-graphic-design-human-brain-cartoon-scribble-123876987.jpg",
+                                "https://cdn.builder.io/api/v1/image/assets/TEMP/2490f025ba2e9645b857766be5713dc7da3aae0ef1487df3c082c802301ba379?placeholderIfAbsent=true&apiKey=b7b395ae03b14b728868337a9d3fb267",
                                 width: 68,
                                 height: 56,
                                 fit: BoxFit.contain,
-                              ),
+                              ),      
                               const SizedBox(height: 9),
                               Text(
                                 'LearnTrack',
@@ -111,6 +157,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   controller: _nameController,
                                   label: 'Full Name',
                                   hintText: 'Enter your name',
+                                  iconUrl: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Bust%20in%20Silhouette.png",
+                                  validator: _validateName,
                                 ),
                                 const SizedBox(height: 16),
 
@@ -118,6 +166,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   controller: _emailController,
                                   label: 'Email',
                                   hintText: 'Enter your email',
+                                  iconUrl: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Envelope.png",
+                                  validator: _validateEmail,
                                 ),
                                 const SizedBox(height: 16),
 
@@ -125,7 +175,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   controller: _passwordController,
                                   label: 'Password',
                                   hintText: 'Create a password',
+                                  iconUrl: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Key.png",
                                   isPassword: true,
+                                  validator: _validatePassword,
                                 ),
                                 const SizedBox(height: 16),
 
@@ -133,59 +185,62 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   controller: _ageController,
                                   label: 'Age',
                                   hintText: 'Enter your age',
+                                  iconUrl: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Numbers.png",
                                   keyboardType: TextInputType.number,
+                                  validator: _validateAge,
                                 ),
                                 const SizedBox(height: 16),
+
+                                if (authProvider.error != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 16),
+                                    child: Text(
+                                      authProvider.error!,
+                                      style: const TextStyle(
+                                        color: Colors.red,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
 
                                 // Create Account Button
                                 SizedBox(
                                   width: double.infinity,
                                   child: ElevatedButton(
-                                    onPressed: () async {
-                                      if (_formKey.currentState!.validate()) {
-                                        final authProvider =
-                                            Provider.of<AuthProvider>(context,
-                                                listen: false);
-                                        try {
-                                          await authProvider.signUp(
-                                            fullName:
-                                                _nameController.text.trim(),
-                                            email: _emailController.text.trim(),
-                                            password: _passwordController.text,
-                                            age: int.parse(
-                                                _ageController.text.trim()),
-                                          );
-                                          if (!mounted) return;
+                                    onPressed: authProvider.isLoading
+                                        ? null
+                                        : () async {
+                                            if (_formKey.currentState!.validate()) {
+                                              try {
+                                                await authProvider.signUp(
+                                                  _emailController.text.trim(),
+                                                  _passwordController.text,
+                                                  _nameController.text.trim(),
+                                                  int.parse(_ageController.text),
+                                                );
+                                                
+                                                if (!mounted) return;
 
-                                          if (authProvider.error == null) {
-                                            Navigator.pushReplacement(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    const LearnTrackDash(),
-                                              ),
-                                            );
-                                          } else {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                content:
-                                                    Text(authProvider.error!),
-                                                backgroundColor: Colors.red,
-                                              ),
-                                            );
-                                          }
-                                        } catch (e) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              content: Text(e.toString()),
-                                              backgroundColor: Colors.red,
-                                            ),
-                                          );
-                                        }
-                                      }
-                                    },
+                                                if (authProvider.error == null) {
+                                                  Navigator.pushReplacement(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          const LearnTrackDash(),
+                                                    ),
+                                                  );
+                                                }
+                                              } catch (e) {
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(e.toString()),
+                                                    backgroundColor: Colors.red,
+                                                  ),
+                                                );
+                                              }
+                                            }
+                                          },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color(0xFF4F46E5),
                                       padding: const EdgeInsets.symmetric(
@@ -195,14 +250,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                     ),
-                                    child: Text(
-                                      'Create Account',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w400,
-                                        color: Colors.white,
-                                      ),
-                                    ),
+                                    child: authProvider.isLoading
+                                        ? const SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child: CircularProgressIndicator(
+                                              color: Colors.white,
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                        : Text(
+                                            'Create Account',
+                                            style: GoogleFonts.inter(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w400,
+                                              color: Colors.white,
+                                            ),
+                                          ),
                                   ),
                                 ),
                               ],
