@@ -91,7 +91,7 @@ class _LearnTrackPomodoroState extends State<LearnTrackPomodoro> {
               ),
               Text(
                 formatTime(currentSeconds),
-                style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -100,7 +100,7 @@ class _LearnTrackPomodoroState extends State<LearnTrackPomodoro> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton(
-                icon: const Icon(Icons.play_arrow, size: 40, color: Colors.blue),
+                icon: Icon(Icons.play_arrow, size: 40, color: Colors.blue),
                 onPressed: startTimer,
               ),
               IconButton(
@@ -122,7 +122,8 @@ class _LearnTrackPomodoroState extends State<LearnTrackPomodoro> {
       child: ElevatedButton(
         onPressed: () => setTimer(seconds),
         style: ElevatedButton.styleFrom(
-          backgroundColor: totalSeconds == seconds ? Colors.blue : Colors.grey[300],
+          backgroundColor:
+              totalSeconds == seconds ? Colors.blue : Colors.grey[300],
         ),
         child: Text(label, style: const TextStyle(color: Colors.black)),
       ),
@@ -133,19 +134,22 @@ class _LearnTrackPomodoroState extends State<LearnTrackPomodoro> {
     return Expanded(
       child: ListView(
         children: [
-          _buildMilestone("Milestone 1", "Productivity Basics", "Complete introduction to time management", true),
-          _buildMilestone("Milestone 2", "Advanced Techniques", "Master advanced productivity methods", false),
+          _buildMilestone("Milestone 1", "Productivity Basics",
+              "Complete introduction to time management", true),
+          _buildMilestone("Milestone 2", "Advanced Techniques",
+              "Master advanced productivity methods", false),
         ],
       ),
     );
   }
 
-  Widget _buildMilestone(String title, String subtitle, String description, bool completed) {
+  Widget _buildMilestone(
+      String title, String subtitle, String description, bool completed) {
     return Card(
       child: ListTile(
-        title: Text(subtitle, style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(subtitle, style: TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(description),
-        trailing: completed ? const Icon(Icons.check_circle, color: Colors.green) : const Icon(Icons.radio_button_unchecked, color: Colors.grey),
+        trailing: completed ? Icon(Icons.check_circle, color: Colors.green) : Icon(Icons.radio_button_unchecked, color: Colors.grey),
       ),
     );
   }
