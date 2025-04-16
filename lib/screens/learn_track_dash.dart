@@ -7,8 +7,10 @@ import '../widgets/streak_overview.dart';
 import '../widgets/search_bar.dart';
 import './learn_track_pomodoro.dart';
 import './learn_track_home.dart';
+import './learning_paths_screen.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/learning_provider.dart';
 
 class LearnTrackDash extends StatelessWidget {
   const LearnTrackDash({Key? key}) : super(key: key);
@@ -51,20 +53,30 @@ class LearnTrackDash extends StatelessWidget {
                 const SizedBox(height: 32),
 
                 // Welcome Section
-                Text(
-                  'Welcome!',
-                  style: GoogleFonts.poppins(
-                    fontSize: 30,
-                    color: const Color(0xFF1F2937),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Ready to continue learning?',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    color: const Color(0xFF6B7280),
-                  ),
+                Consumer<AuthProvider>(
+                  builder: (context, authProvider, _) {
+                    final name = authProvider.fullName ?? 'Learner';
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Welcome, $name!',
+                          style: GoogleFonts.poppins(
+                            fontSize: 30,
+                            color: const Color(0xFF1F2937),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Ready to continue learning?',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            color: const Color(0xFF6B7280),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
                 const SizedBox(height: 32),
 
@@ -81,14 +93,59 @@ class LearnTrackDash extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                const CourseCard(
-                  title: 'UI Design Basics',
-                  details: '12 lessons • 2.5 hours',
-                ),
-                const SizedBox(height: 16),
-                const CourseCard(
-                  title: 'Python Programming',
-                  details: '24 lessons • 4 hours',
+                Consumer<LearningProvider>(
+                  builder: (context, learningProvider, _) {
+                    final courses = learningProvider.currentCourses;
+
+                    if (courses.isEmpty) {
+                      return Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              offset: const Offset(0, 1),
+                              blurRadius: 2,
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Column(
+                            children: [
+                              const Icon(
+                                Icons.search,
+                                size: 24,
+                                color: Color(0xFFD1D5DB),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Search for a topic to start learning',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  color: const Color(0xFF9CA3AF),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+
+                    return Column(
+                      children: courses.map((course) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: CourseCard(
+                            title: course['title'] ?? 'Untitled Course',
+                            details: course['details'] ?? 'No details',
+                            progress: course['progress'] as double? ?? 0.0,
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  },
                 ),
                 const SizedBox(height: 32),
 
@@ -111,11 +168,19 @@ class LearnTrackDash extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    const Expanded(
+                    Expanded(
                       child: ActionButton(
                         icon: 'paths',
                         label: 'My Paths',
                         isActive: false,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LearningPathsScreen(),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ],
@@ -157,10 +222,10 @@ class LearnTrackDash extends StatelessWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.logout_rounded,
                               size: 20,
-                              color: const Color(0xFF6B7280),
+                              color: Color(0xFF6B7280),
                             ),
                             const SizedBox(width: 8),
                             Text(

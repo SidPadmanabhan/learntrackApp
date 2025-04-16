@@ -93,6 +93,8 @@ class AuthProvider extends ChangeNotifier {
         age: age,
       );
       await _fetchUserData();
+
+      // Authentication state change will trigger learning provider refresh
     } catch (e) {
       _error = e.toString();
       print('Signup error: $e');
@@ -118,6 +120,8 @@ class AuthProvider extends ChangeNotifier {
         password: password,
       );
       await _fetchUserData();
+
+      // Authentication state change will trigger learning provider refresh
     } catch (e) {
       _error = e.toString();
       print('Login error: $e');
@@ -135,6 +139,8 @@ class AuthProvider extends ChangeNotifier {
     try {
       await _authService.signOut();
       _userData = null;
+
+      // Additional cleanup happens through provider listeners
     } catch (e) {
       _error = e.toString();
     } finally {

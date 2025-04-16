@@ -144,10 +144,13 @@ class AuthService {
         // Store token
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', token);
+        // Store user ID in SharedPreferences for path association
+        final userId = data['uid'] ?? 'unknown';
+        await prefs.setString('user_id', userId);
 
         // Set current user
         _currentUser = User(
-          uid: data['uid'] ?? 'unknown',
+          uid: userId,
           email: email,
           name: name,
         );
@@ -219,10 +222,13 @@ class AuthService {
         // Store token
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', token);
+        // Store user ID in SharedPreferences for path association
+        final userId = data['uid'] ?? 'unknown';
+        await prefs.setString('user_id', userId);
 
         // Set current user
         _currentUser = User(
-          uid: data['uid'] ?? 'unknown',
+          uid: userId,
           email: email,
           name: data['name'],
         );
@@ -243,6 +249,7 @@ class AuthService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('auth_token');
+      await prefs.remove('user_id'); // Remove user ID on sign out
       _currentUser = null;
       _authStateChanges.value = null;
     } catch (e) {

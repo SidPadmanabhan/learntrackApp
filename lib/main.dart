@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
+import 'providers/learning_provider.dart';
 import 'screens/learn_track_home.dart';
 import 'screens/learn_track_dash.dart';
 
@@ -14,8 +15,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AuthProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProxyProvider<AuthProvider, LearningProvider>(
+          create: (_) => LearningProvider(),
+          update: (_, authProvider, learningProvider) {
+            learningProvider!.setAuthProvider(authProvider);
+            return learningProvider;
+          },
+        ),
+      ],
       child: Consumer<AuthProvider>(builder: (context, authProvider, _) {
         return MaterialApp(
           title: 'LearnTrack',
