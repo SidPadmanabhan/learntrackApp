@@ -187,6 +187,158 @@ class LearningProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> completeModule(
+      int pathIndex, int moduleIndex, bool completed) async {
+    try {
+      if (pathIndex < 0 || pathIndex >= _learningPaths.length) {
+        throw 'Invalid path index';
+      }
+
+      final path = _learningPaths[pathIndex];
+      final modules = path['modules'] as List<dynamic>? ?? [];
+
+      if (moduleIndex < 0 || moduleIndex >= modules.length) {
+        throw 'Invalid module index';
+      }
+
+      final module = modules[moduleIndex] as Map<String, dynamic>;
+
+      // Update module completion status
+      module['completed'] = completed;
+
+      // If marking as completed, also mark all lessons as completed
+      if (completed) {
+        final lessons = module['lessons'] as List<dynamic>? ?? [];
+        for (var lesson in lessons) {
+          (lesson as Map<String, dynamic>)['completed'] = true;
+        }
+      }
+
+      // Update path progress
+      final completedModules = modules
+          .where((module) => module['completed'] as bool? ?? false)
+          .length;
+      path['progress'] = completedModules / modules.length;
+
+      // Update course progress in current courses list
+      for (var course in _currentCourses) {
+        if (course['title'] == path['title']) {
+          course['progress'] = path['progress'];
+          break;
+        }
+      }
+
+      // Save changes
+      await _saveCourses();
+      await _saveLearningPaths();
+
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> completeLesson(
+      int pathIndex, int moduleIndex, int lessonIndex, bool completed) async {
+    try {
+      if (pathIndex < 0 || pathIndex >= _learningPaths.length) {
+        throw 'Invalid path index';
+      }
+
+      final path = _learningPaths[pathIndex];
+      final modules = path['modules'] as List<dynamic>? ?? [];
+
+      if (moduleIndex < 0 || moduleIndex >= modules.length) {
+        throw 'Invalid module index';
+      }
+
+      final module = modules[moduleIndex] as Map<String, dynamic>;
+      final lessons = module['lessons'] as List<dynamic>? ?? [];
+
+      if (lessonIndex < 0 || lessonIndex >= lessons.length) {
+        throw 'Invalid lesson index';
+      }
+
+      // Check if previous lessons are completed (for sequential completion)
+      if (completed && lessonIndex > 0) {
+        bool allPreviousCompleted = true;
+        for (int i = 0; i < lessonIndex; i++) {
+          final prevLesson = lessons[i];
+          if (!(prevLesson['completed'] as bool? ?? false)) {
+            allPreviousCompleted = false;
+            break;
+          }
+        }
+
+        if (!allPreviousCompleted) {
+          throw 'Complete previous lessons first';
+        }
+      }
+
+      // Update lesson completion status
+      (lessons[lessonIndex] as Map<String, dynamic>)['completed'] = completed;
+
+      // Check if all lessons are completed to mark module as completed
+      final allLessonsCompleted =
+          lessons.every((lesson) => lesson['completed'] as bool? ?? false);
+      if (allLessonsCompleted) {
+        module['completed'] = true;
+
+        // Update path progress
+        final completedModules = modules
+            .where((module) => module['completed'] as bool? ?? false)
+            .length;
+        path['progress'] = completedModules / modules.length;
+
+        // Update course progress in current courses list
+        for (var course in _currentCourses) {
+          if (course['title'] == path['title']) {
+            course['progress'] = path['progress'];
+            break;
+          }
+        }
+      } else if (!completed) {
+        // If a lesson is unmarked, the module should also be unmarked
+        module['completed'] = false;
+
+        // Update path progress
+        final completedModules = modules
+            .where((module) => module['completed'] as bool? ?? false)
+            .length;
+        path['progress'] = completedModules / modules.length;
+
+        // Update course progress in current courses list
+        for (var course in _currentCourses) {
+          if (course['title'] == path['title']) {
+            course['progress'] = path['progress'];
+            break;
+          }
+        }
+      }
+
+      // Save changes
+      await _saveCourses();
+      await _saveLearningPaths();
+
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> _saveLearningPaths() async {
+    try {
+      final uid = await _getUserId();
+      if (uid != null && _learningPaths.isNotEmpty) {
+        await _learningService.saveLearningPaths(_learningPaths);
+      }
+    } catch (e) {
+      print('Error saving learning paths: $e');
+    }
+  }
+
   void clearError() {
     _error = null;
     notifyListeners();

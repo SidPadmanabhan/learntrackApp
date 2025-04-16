@@ -37,6 +37,9 @@ class ActionButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: isActive ? const Color(0xFF4F46E5) : Colors.white,
           borderRadius: BorderRadius.circular(12),
+          border: isActive
+              ? null
+              : Border.all(color: const Color(0xFFE5E7EB), width: 1),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,

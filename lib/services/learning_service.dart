@@ -316,13 +316,16 @@ class LearningService {
             {
               "title": "Module 1 Title",
               "description": "Description of module",
+              "estimatedHours": estimated hours for this module,
               "lessons": [
-                {"title": "Lesson title", "description": "Brief lesson description"}
-              ],
-              "resources": [
-                {"type": "article", "title": "Resource title", "url": "Actual URL to the resource"}
-              ],
-              "estimatedHours": estimated hours for this module
+                {
+                  "title": "Lesson title", 
+                  "description": "Brief lesson description",
+                  "resources": [
+                    {"type": "article|video|book|course|tool", "title": "Resource title", "url": "Actual URL to the resource"}
+                  ]
+                }
+              ]
             }
           ]
         }
@@ -330,7 +333,9 @@ class LearningService {
         Make sure to include 3-5 modules with 3-6 lessons each, depending on the complexity of the topic.
         Include a mix of theoretical and practical lessons.
         
-        IMPORTANT: For resources, include REAL, SPECIFIC URLs to actual:
+        IMPORTANT: Each LESSON should have its own set of 2-3 resources directly related to that specific lesson's content.
+        
+        For resources, include REAL, SPECIFIC URLs to actual:
         - articles (from websites like medium.com, dev.to, css-tricks.com, smashingmagazine.com)
         - videos (from YouTube with real channel names)
         - courses (from platforms like Coursera, Udemy, edX, Khan Academy) 
@@ -362,6 +367,33 @@ class LearningService {
 
       final jsonString = text.substring(jsonStart, jsonEnd);
       final Map<String, dynamic> learningPath = jsonDecode(jsonString);
+
+      // Add progress tracking fields
+      learningPath['progress'] = 0.0;
+
+      // Add completed fields to each module
+      if (learningPath['modules'] != null) {
+        final modules = learningPath['modules'] as List<dynamic>;
+        for (int i = 0; i < modules.length; i++) {
+          final module = modules[i] as Map<String, dynamic>;
+          // Set all modules as incomplete initially (first module is unlocked)
+          module['completed'] = false;
+
+          // Add completed fields to each lesson if they exist
+          if (module['lessons'] != null) {
+            final lessons = module['lessons'] as List<dynamic>;
+            for (int j = 0; j < lessons.length; j++) {
+              final lesson = lessons[j] as Map<String, dynamic>;
+              lesson['completed'] = false;
+
+              // Ensure each lesson has a resources array
+              if (lesson['resources'] == null) {
+                lesson['resources'] = [];
+              }
+            }
+          }
+        }
+      }
 
       // Save to backend
       await _saveLearningPath(learningPath);
@@ -543,6 +575,36 @@ class LearningService {
     } catch (e) {
       print('Error in saveCurrentCourses: $e');
       return false;
+    }
+  }
+
+  // Save learning paths to local storage
+  Future<void> saveLearningPaths(List<Map<String, dynamic>> paths) async {
+    try {
+      final uid = await _getUserId();
+      if (uid == null) return;
+
+      // Save to local storage for offline access
+      await _savePathsToLocalStorage(paths, uid);
+
+      // Try to save to server
+      try {
+        final token = await _getAuthToken();
+        final response = await http.post(
+          Uri.parse('$baseUrl/users/$uid/paths'),
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+            'X-User-ID': uid,
+          },
+          body: jsonEncode({'paths': paths}),
+        );
+      } catch (e) {
+        print('Failed to save paths to server: $e');
+        // Still saved to local storage, so not a critical error
+      }
+    } catch (e) {
+      print('Error saving learning paths: $e');
     }
   }
 }

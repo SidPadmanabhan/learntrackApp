@@ -4,13 +4,10 @@ import sqlite3
 
 def init_database():
     connection = get_connection()
-    
-    # Check if we're using SQLite (our custom connection class) or MySQL
     is_sqlite = hasattr(connection, 'db_path')
     
     try:
         with connection.cursor() as cursor:
-            # Create users table with syntax that works for both MySQL and SQLite
             if is_sqlite:
                 sql = """
                 CREATE TABLE IF NOT EXISTS users (
@@ -35,18 +32,13 @@ def init_database():
                 """
             cursor.execute(sql)
             
-            # Add more table creation statements as needed for your app
-            
         connection.commit()
         print("Database initialized successfully")
         
-        # For SQLite, let's create a test user
         if is_sqlite:
             with connection.cursor() as cursor:
-                # Check if test user exists
                 cursor.execute("SELECT * FROM users WHERE email = 'test@example.com'")
                 if not cursor.fetchone():
-                    # Create a test user with hashed password (hash of 'password')
                     cursor.execute(
                         "INSERT INTO users (name, email, password, age) VALUES (?, ?, ?, ?)",
                         ("Test User", "test@example.com", "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8", 25)

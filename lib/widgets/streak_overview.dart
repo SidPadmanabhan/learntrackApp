@@ -14,14 +14,12 @@ class StreakOverview extends StatefulWidget {
 class _StreakOverviewState extends State<StreakOverview> {
   bool _isLoading = false;
   bool _justCompleted = false;
-  // Local copy of streak data for immediate UI updates
   Map<String, dynamic>? _localStreakData;
   int _lastStreakDataHash = 0;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Check if provider data has changed and reset local data if needed
     final provider = Provider.of<LearningProvider>(context, listen: false);
     final streakData = provider.streakData;
 
@@ -34,7 +32,6 @@ class _StreakOverviewState extends State<StreakOverview> {
         });
       }
     } else if (_localStreakData != null) {
-      // If provider data is null but we have local data, reset it
       setState(() {
         _localStreakData = null;
         _lastStreakDataHash = 0;
@@ -42,13 +39,10 @@ class _StreakOverviewState extends State<StreakOverview> {
     }
   }
 
-  // Compute a simple hash of the streak data to detect changes
   int _computeStreakDataHash(Map<String, dynamic> data) {
     int hash = 0;
-    // Add current streak to hash
     hash += (data['currentStreak'] as int? ?? 0) * 1000;
 
-    // Add day completion status to hash
     final days = data['days'] as List<dynamic>? ?? [];
     for (int i = 0; i < days.length; i++) {
       if (days[i]['completed'] as bool? ?? false) {
@@ -70,13 +64,10 @@ class _StreakOverviewState extends State<StreakOverview> {
       final learningProvider =
           Provider.of<LearningProvider>(context, listen: false);
 
-      // Get the current data
       final streakData = learningProvider.streakData;
       if (streakData != null) {
-        // Make a deep copy of streak data
         _localStreakData = Map<String, dynamic>.from(streakData);
 
-        // Update the local copy for immediate UI update
         final now = DateTime.now();
         final weekday = now.weekday;
         final todayIndex = weekday > 5 ? 4 : weekday - 1;
@@ -84,14 +75,11 @@ class _StreakOverviewState extends State<StreakOverview> {
         if (_localStreakData!['days'] != null &&
             todayIndex >= 0 &&
             todayIndex < (_localStreakData!['days'] as List).length) {
-          // Update today's day to completed
           (_localStreakData!['days'] as List)[todayIndex]['completed'] = true;
 
-          // Update current streak count
           _localStreakData!['currentStreak'] =
               (_localStreakData!['currentStreak'] as int? ?? 0) + 1;
 
-          // Update week progress
           final completedDays = (_localStreakData!['days'] as List)
               .where((day) => day['completed'] == true)
               .length;
@@ -100,16 +88,13 @@ class _StreakOverviewState extends State<StreakOverview> {
         }
       }
 
-      // Now update the real data in the provider
       await learningProvider.updateStreak(true);
 
-      // Mark as just completed to show a success message briefly
       setState(() {
         _justCompleted = true;
         _isLoading = false;
       });
 
-      // Reset the success message after a delay
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) {
           setState(() {
@@ -130,7 +115,6 @@ class _StreakOverviewState extends State<StreakOverview> {
   Widget build(BuildContext context) {
     return Consumer<LearningProvider>(
       builder: (context, learningProvider, _) {
-        // Use local data if available (for immediate UI update) or fall back to provider data
         final streakData = _localStreakData ?? learningProvider.streakData;
         final int currentStreak = streakData?['currentStreak'] as int? ?? 0;
         final double weekProgress =
@@ -164,24 +148,8 @@ class _StreakOverviewState extends State<StreakOverview> {
                       color: const Color(0xFF1F2937),
                     ),
                   ),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.local_fire_department_rounded,
-                        color: Color(0xFFF59E0B),
-                        size: 20,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '$currentStreak days',
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF4F46E5),
-                        ),
-                      ),
-                    ],
-                  ),
+                  // Empty container to maintain spacing
+                  const SizedBox(width: 1),
                 ],
               ),
               const SizedBox(height: 16),
@@ -213,8 +181,6 @@ class _StreakOverviewState extends State<StreakOverview> {
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Show success message if just completed
               if (_justCompleted)
                 Container(
                   width: double.infinity,
@@ -243,7 +209,6 @@ class _StreakOverviewState extends State<StreakOverview> {
                     ],
                   ),
                 )
-              // Add button to mark today as completed if not already done
               else if (!isTodayDone)
                 SizedBox(
                   width: double.infinity,
@@ -275,7 +240,6 @@ class _StreakOverviewState extends State<StreakOverview> {
                           ),
                   ),
                 )
-              // Show completed status if already done
               else
                 Container(
                   width: double.infinity,
