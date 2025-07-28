@@ -1,16 +1,21 @@
-# learntrack
+# LearnTrack
 
-A new Flutter project.
+A learning and productivity tracking application built with Flutter and Flask.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- **Learning Path Management**: Create and follow structured learning paths
+- **Pomodoro Timer**: Built-in productivity timer for focused study sessions
+- **Progress Dashboard**: Track learning progress and achievements
+- **User Authentication**: Secure login and signup functionality
 
-A few resources to get you started if this is your first Flutter project:
+## Architecture
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Frontend
+- **Framework**: Flutter 3.5.4+
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Backend
+- **Framework**: Flask (Python)
+- **Database**: SQLite
+- **Features**: User management, authentication, learning data persistence
+
