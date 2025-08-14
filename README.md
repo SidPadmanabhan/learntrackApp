@@ -2,7 +2,7 @@
 
 ---
 
-A smart learning and productivity tracking application that helps you master new skills efficiently. Built with Flutter and Flask. 🚀
+A smart learning and productivity tracking application that helps you master new skills efficiently. Built with Flutter and Flask. 
 
 ## ✨ Features
 
