@@ -4,7 +4,7 @@
 
 A smart learning and productivity tracking application that helps you master new skills efficiently. Built with Flutter and Flask. 
 
-## ✨ Features
+## Features
 
 - 🗺️ **Learning Path Management**: Create and follow structured learning paths tailored to your goals
 - 🍅 **Pomodoro Timer**: Built-in productivity timer for focused study sessions that maximize retention
